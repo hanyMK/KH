@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<!-- dtd는 유효성 검사를 해주는 것
+	
+ -->
+<properties>
+
+		<entry key="selectHashtagListCount">
+		SELECT COUNT(*)
+		 FROM 
+		      hashtag_bridge
+		WHERE 
+		      HASHTAG = ?
+	</entry>
+	
+	<entry key="selectHashtag">
+		SELECT 
+				HASHTAG, 
+				HASH_CONTENT
+  			
+  		  FROM 
+  		        HASHTAG
+	</entry>
+	
+		<entry key="selectHashList">
+	
+		 SELECT 
+				HB.BOARD_NO AS BOARD_NO,
+				HASH_CONTENT
+		  FROM 
+		  		HASHTAG_BRIDGE HB
+		  JOIN 
+		        HASHTAG H ON (HB.HASHTAG = H.HASHTAG)
+		   JOIN 
+		         MAIN_BOARD B ON(B.BOARD_NO = HB.BOARD_NO)
+		   
+			
+				
+	</entry>
+	
+	<entry key="insertHashtag">
+		INSERT INTO 
+					HASHTAG
+					(HASHTAG,
+					HASH_CONTENT)
+		     VALUES
+		     (?, ?)
+	
+	</entry>
+	
+	
+	
+	<entry key="selectLastBoardNo">
+		SELECT 
+				MAX(BOARD_NO) BOARD_NO
+		  FROM 
+		       MAIN_BOARD
+	</entry>
+	
+	
+	
+	
+	<entry key="insertBoardHashtag">
+		INSERT INTO 
+					HASHTAG_BRIDGE
+					(BOARD_NO,
+					HASHTAG)
+			VALUES
+					(?, ?)
+	</entry>
+	
+	
+	<entry key="selectHashtagByBoardNo">
+	
+		 SELECT 
+				HB.BOARD_NO AS BOARD_NO,
+				HASH_CONTENT
+		  FROM 
+		  		HASHTAG_BRIDGE HB
+		  JOIN 
+		        HASHTAG H ON (HB.HASHTAG = H.HASHTAG)
+		   JOIN 
+		         MAIN_BOARD B ON(B.BOARD_NO = HB.BOARD_NO)
+		   WHERE
+				
+				B.BOARD_NO =?
+		
+			
+				
+	</entry>
+	
+	<entry key="searchTag">
+	SELECT * FROM(SELECT ROWNUM RNUM, A.*
+                        FROM(
+ 
+                            SELECT 
+                                    B.BOARD_NO,
+                                    B.MEMBER_NO,
+                                     NICKNAME,
+                                    BOARD_TYPE,
+                                    CATEGORY,
+                                    BOARD_TITLE,
+                                    BOARD_CONTENT,
+                                    TO_CHAR(CREATE_DATE, 'YY/MM/DD  HH:MI')CREATE_DATE,
+                                    BOARD_COUNT,
+                                    (CASE WHEN B.VOTE_YN= 'Y' AND B.BOARD_NO = V.BOARD_NO THEN VOTE_TITLE END) AS VOTE_TITLE,
+                                    (CASE WHEN B.BOARD_NO= F.BOARD_NO THEN FILE_NO  END) AS FILE_NO,
+                                    CHANGE_NAME,
+                                      FILE_LEVEL,                                    
+                                    FILE_PATH,
+                                    FILE_STATUS,
+                                    ORIGIN_NAME ,
+                                    SUM(BOARD_LIKE_COUNT)AS POST_LIKE, 
+                                    SUM(BOARD_DISLIKE_COUNT)AS POST_DISLIKE ,
+                                    COUNT(REPLY_NO) AS REPLY_COUNT,
+                                    h.HASH_CONTENT
+                             FROM
+                                    MAIN_BOARD B 
+                        LEFT JOIN   
+                                    BOARD_VOTE V ON(V.BOARD_NO = B.BOARD_NO)
+                        LEFT JOIN  
+                                    hashtag_bridge HB ON(HB.BOARD_NO = B.BOARD_NO)
+                             JOIN 
+                            		 HASHTAG H  ON (H.HASHTAG = HB.HASHTAG)
+                        LEFT JOIN 
+                                    BOARD_ATTACH F ON(F.BOARD_NO = B.BOARD_NO)
+                        LEFT JOIN 
+                                    BOARD_LIKE_POST BK ON(bk.board_no = B.BOARD_NO)
+                         LEFT JOIN 
+                                    reply R ON(R.BOARD_NO = B.BOARD_NO)
+                            LEFT JOIN 
+                                    (SELECT NICKNAME,
+                                          MEMBER_NO
+                                    FROM MEMBER) M ON (M.MEMBER_NO = B.MEMBER_NO)
+                           
+                             WHERE 
+                                    B.BOARD_STATUS = 'N' 
+                              AND 
+                                    B.BOARD_STATUS !='S' 
+                              AND 
+                                	HB.HASHTAG =?
+                         GROUP BY 
+                          			B.BOARD_NO, B.MEMBER_NO, NICKNAME, BOARD_TYPE, CATEGORY, BOARD_TITLE, 
+                                    BOARD_CONTENT, TO_CHAR(CREATE_DATE, 'YY/MM/DD  HH:MI'), BOARD_COUNT, (CASE WHEN B.VOTE_YN= 'Y' AND B.BOARD_NO = V.BOARD_NO THEN VOTE_TITLE END), (CASE WHEN B.BOARD_NO= F.BOARD_NO THEN FILE_NO END), 
+                                    CHANGE_NAME,FILE_LEVEL, FILE_NO, FILE_PATH, FILE_STATUS, 
+                                    ORIGIN_NAME,h.HASH_CONTENT
+                         HAVING FILE_LEVEL = 0 OR FILE_LEVEL IS NULL
+                                ORDER BY B.BOARD_NO DESC) A)
+ 	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectHashtagList">
+			   SELECT
+			  			HASH_CONTENT
+			FROM 
+						HASHTAG
+			WHERE 
+						HASH_CONTENT LIKE ?
+	</entry>
+	
+	<entry key="selectHashtagForupdate">
+		SELECT 
+		            
+		            HASHTAG
+		  FROM 
+				  	HASHTAG_BRIDGE 
+		 WHERE
+						
+					BOARD_NO =?
+	</entry>
+	
+	<entry key="deleteHashtag">
+		DELETE FROM HASHTAG_BRIDGE
+		WHERE BOARD_NO =?
+		
+	</entry>
+	
+	
+	<entry key="deleteHashtagForUpdate">
+		DELETE FROM HASHTAG_BRIDGE
+		WHERE BOARD_NO = ?
+		AND 
+             HASHTAG = ?
+		
+	</entry>
+	
+
+</properties>

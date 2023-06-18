@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<!-- dtd는 유효성 검사를 해주는 것
+	
+ -->
+<properties>
+
+
+	<entry key="insertReport">
+	INSERT INTO
+   				BOARD_REPORT
+			   (BOARD_NO,
+			    MEMBER_NO,
+			    REPORT_REASON)
+    VALUES
+			    (?,?,? )
+	
+	</entry>
+	
+	<entry key="selectListCount">
+		SELECT COUNT(*) FROM (SELECT 
+                        ROWNUM RNUM, A.* 
+                FROM(SELECT  
+                             R.BOARD_NO,
+                             R.MEMBER_NO,
+                             NICKNAME,
+                             BOARD_TYPE,
+                             BOARD_STATUS_R,
+                             TO_CHAR(BOARD_REPORT_DATE, 'YY/MM/DD  HH:MI')BOARD_REPORT_DATE,
+                             REPORT_REASON,
+                             COUNT(*) OVER(PARTITION BY R.BOARD_NO) AS CNT,
+                             ROW_NUMBER()OVER(PARTITION BY R.BOARD_NO ORDER BY BOARD_REPORT_DATE DESC) AS NUM
+                                 
+                      FROM   
+                            BOARD_REPORT R
+                 LEFT JOIN 
+                      		  (SELECT NICKNAME,
+                                        MEMBER_NO
+                              FROM MEMBER ) M ON (M.MEMBER_NO = R.MEMBER_NO)
+                 LEFT JOIN
+                            (SELECT BOARD_TYPE,
+                                    BOARD_NO
+                            FROM MAIN_BOARD)T ON (T.BOARD_NO = R.BOARD_NO )
+                 ORDER BY
+                            BOARD_REPORT_DATE DESC
+                        )A
+                WHERE 
+                       A.CNT > 1
+                AND 
+                    A.NUM =1)
+	</entry>
+	
+	<entry key="selectBoardReportList">
+		SELECT * FROM (SELECT 
+                        ROWNUM RNUM, A.* 
+                FROM(SELECT  
+                             R.BOARD_NO,
+                             R.MEMBER_NO,
+                             NICKNAME,
+                             BOARD_TYPE,
+                             BOARD_STATUS_R,
+                             TO_CHAR(BOARD_REPORT_DATE, 'YY/MM/DD  HH24:MI')BOARD_REPORT_DATE,
+                             REPORT_REASON,
+                             COUNT(*) OVER(PARTITION BY R.BOARD_NO) AS CNT,
+                             ROW_NUMBER()OVER(PARTITION BY R.BOARD_NO ORDER BY BOARD_REPORT_DATE DESC) AS NUM
+                                 
+                      FROM   
+                            BOARD_REPORT R
+                 LEFT JOIN 
+                      		  (SELECT NICKNAME,
+                                        MEMBER_NO
+                              FROM MEMBER ) M ON (M.MEMBER_NO = R.MEMBER_NO)
+                 LEFT JOIN
+                            (SELECT BOARD_TYPE,
+                                    BOARD_NO
+                            FROM MAIN_BOARD)T ON (T.BOARD_NO = R.BOARD_NO )
+                 ORDER BY
+                            BOARD_REPORT_DATE DESC
+                        )A
+                WHERE 
+                       A.CNT > 1
+                AND 
+                    A.NUM =1)
+WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectBoardReport">
+		SELECT 
+                        ROWNUM RNUM, A.* 
+                FROM(SELECT  
+                             R.BOARD_NO,
+                             R.MEMBER_NO,
+                             NICKNAME,
+                             BOARD_TYPE,
+                            BOARD_STATUS_R,
+                             TO_CHAR(BOARD_REPORT_DATE, 'YY/MM/DD  HH:MI')BOARD_REPORT_DATE,
+                             COUNT(*) OVER(PARTITION BY R.BOARD_NO) AS CNT,
+                             ROW_NUMBER()OVER(PARTITION BY R.BOARD_NO ORDER BY BOARD_REPORT_DATE DESC) AS NUM
+                                 
+                      FROM   
+                            BOARD_REPORT R
+                  
+                    LEFT JOIN 
+                      		  (SELECT NICKNAME,
+                                        MEMBER_NO
+                              FROM MEMBER ) M ON (M.MEMBER_NO = R.MEMBER_NO)
+                 LEFT JOIN
+                            (SELECT BOARD_TYPE,
+                                    BOARD_NO
+                            FROM MAIN_BOARD)T ON (T.BOARD_NO = R.BOARD_NO )
+                         WHERE R.BOARD_NO = ?)A
+                WHERE 
+                       A.CNT > 1
+                AND 
+                    A.NUM =1
+	</entry>
+	
+	
+	<entry key="deleteBoardReport">
+					                    
+			DELETE FROM 
+			            BOARD_REPORT
+			      WHERE 
+			            BOARD_NO=?
+	</entry>
+	
+	<entry key="updateBoardStatus">
+		UPDATE MAIN_BOARD
+		SET BOARD_STATUS = 'Y'
+		WHERE BOARD_NO = ?
+	</entry>
+	
+	
+	<entry key="updateBoardReport">
+		UPDATE BOARD_REPORT
+		SET BOARD_STATUS_R = 'Y'
+		WHERE BOARD_NO = ?
+	</entry>
+	
+	<entry key="updateMemberReport">
+			UPDATE MEMBER
+			SET REPORT_NO = REPORT_NO +1
+			WHERE MEMBER_NO = ?
+	</entry>
+	
+	<entry key="insertReplyReport">
+		INSERT INTO
+					REPLY_REPORT
+					(
+					BOARD_NO,
+					REPLY_NO,
+					MEMBER_NO,
+					REPORT_REASON
+					)
+					VALUES
+					(
+					?,?,?,?
+					)
+	</entry>
+	
+	<entry key="selectBoard">
+		SELECT A.*
+                        FROM(
+ 
+                            SELECT 
+                                    B.BOARD_NO,
+                                    B.MEMBER_NO,
+                                    BOARD_TYPE,
+                                    CATEGORY,
+                                    BOARD_TITLE,
+                                    BOARD_CONTENT,
+                                    TO_CHAR(CREATE_DATE, 'YY/MM/DD  HH:MI')CREATE_DATE,
+                                    BOARD_COUNT,
+                                    (CASE WHEN B.VOTE_YN= 'Y' AND B.BOARD_NO = V.BOARD_NO THEN VOTE_TITLE END) AS VOTE_TITLE,
+                                    (CASE WHEN B.BOARD_NO= F.BOARD_NO THEN FILE_NO END) AS FILE_NO,
+                                    
+                                    FILE_LEVEL,                                    
+                                     (FILE_PATH || '/' || CHANGE_NAME) AS FILE_PATH, 
+                                    FILE_STATUS,
+                                    ORIGIN_NAME ,
+                                    SUM(BOARD_LIKE_COUNT)AS POST_LIKE, 
+                                    SUM(BOARD_DISLIKE_COUNT)AS POST_DISLIKE ,
+                                    COUNT(REPLY_NO) AS REPLY_COUNT
+                             FROM
+                                    MAIN_BOARD B 
+                             LEFT JOIN   
+                                    BOARD_VOTE V ON(V.BOARD_NO = B.BOARD_NO)
+                             LEFT JOIN  
+                                    hashtag_bridge HB ON(HB.BOARD_NO = B.BOARD_NO)
+                             LEFT JOIN 
+                                    BOARD_ATTACH F ON(F.BOARD_NO = B.BOARD_NO)
+                            LEFT JOIN 
+                                    BOARD_LIKE_POST BK ON(bk.board_no = B.BOARD_NO)
+                            LEFT JOIN 
+                                    reply R ON(R.BOARD_NO = B.BOARD_NO)
+                             WHERE 
+                                    B.BOARD_STATUS !='S' 
+                              AND B.BOARD_NO= ?
+                              
+                             group by B.BOARD_NO, B.MEMBER_NO, BOARD_TYPE, CATEGORY, BOARD_TITLE, 
+                                    BOARD_CONTENT, TO_CHAR(CREATE_DATE, 'YY/MM/DD  HH:MI'), BOARD_COUNT, (CASE WHEN B.VOTE_YN= 'Y' AND B.BOARD_NO = V.BOARD_NO THEN VOTE_TITLE END), (CASE WHEN B.BOARD_NO= F.BOARD_NO THEN FILE_NO END), 
+                                    CHANGE_NAME, FILE_LEVEL, FILE_NO, FILE_PATH, FILE_STATUS, 
+                                    ORIGIN_NAME
+                                ) A
+	</entry>
+	
+	<entry key="selectReplyListCount">
+		    
+SELECT COUNT(*) FROM (SELECT 
+                        ROWNUM RNUM, A.* 
+                FROM(SELECT  
+                             R.BOARD_NO,
+                             R.REPLY_NO,
+                             R.MEMBER_NO,
+                             NICKNAME,
+                             TO_CHAR(REPLY_REPORT_DATE, 'YY/MM/DD  HH:MI')REPLY_REPORT_DATE,
+                             REPORT_REASON,
+                             REPLY_STATUS_R,
+                             COUNT(*) OVER(PARTITION BY REPLY_NO) AS CNT,
+                             ROW_NUMBER()OVER(PARTITION BY REPLY_NO ORDER BY REPLY_REPORT_DATE DESC) AS NUM
+                                 
+                      FROM   
+                            REPLY_REPORT R
+                  
+                     LEFT JOIN 
+                      		  (SELECT NICKNAME,
+                                        MEMBER_NO
+                              FROM MEMBER ) M ON (M.MEMBER_NO = R.MEMBER_NO)
+                 LEFT JOIN
+                            (SELECT BOARD_TYPE,
+                                    BOARD_NO
+                            FROM MAIN_BOARD)T ON (T.BOARD_NO = R.BOARD_NO )
+                 ORDER BY
+                            REPLY_REPORT_DATE DESC
+                        )A
+                WHERE 
+                       A.CNT > 10
+                AND 
+                    A.NUM =1)
+	</entry>
+	
+	
+		<entry key="selectReplyReportList">
+		SELECT * FROM (SELECT 
+                        ROWNUM RNUM, A.* 
+                FROM(SELECT  
+                             R.BOARD_NO,
+                             R.REPLY_NO,
+                             R.MEMBER_NO,
+                             NICKNAME,
+                             TO_CHAR(REPLY_REPORT_DATE, 'YY/MM/DD  HH:MI')REPLY_REPORT_DATE,
+                             REPORT_REASON,
+                             REPLY_STATUS_R,
+                             COUNT(*) OVER(PARTITION BY REPLY_NO) AS CNT,
+                             ROW_NUMBER()OVER(PARTITION BY REPLY_NO ORDER BY REPLY_REPORT_DATE DESC) AS NUM
+                                 
+                      FROM   
+                            REPLY_REPORT R
+                  
+                     LEFT JOIN 
+                      		  (SELECT NICKNAME,
+                                        MEMBER_NO
+                              FROM MEMBER ) M ON (M.MEMBER_NO = R.MEMBER_NO)
+                 LEFT JOIN
+                            (SELECT BOARD_TYPE,
+                                    BOARD_NO
+                            FROM MAIN_BOARD)T ON (T.BOARD_NO = R.BOARD_NO )
+                 ORDER BY
+                            REPLY_REPORT_DATE DESC
+                        )A
+                WHERE 
+                       A.CNT > 10
+                AND 
+                    A.NUM =1)
+WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	
+	<entry key="selectReplyReport">
+	SELECT 
+                      ROWNUM RNUM, A.* 
+              FROM(SELECT  
+                           BOARD_NO,
+                           MEMBER_NO,
+                           REPLY_NO,
+                           NICKNAME,
+                           REPORT_REASON,
+                           REPLY_STATUS_R,
+                           TO_CHAR(REPLY_REPORT_DATE, 'YY/MM/DD  HH:MI') REPLY_REPORT_DATE,
+                           COUNT(*) OVER(PARTITION BY REPLY_NO) AS CNT,
+                           ROW_NUMBER()OVER(PARTITION BY REPLY_NO ORDER BY REPLY_REPORT_DATE DESC) AS NUM
+                               
+                    FROM   
+                          REPLY_REPORT
+                
+                    LEFT JOIN (SELECT NICKNAME,
+                                      MEMBER_NO
+                            FROM MEMBER )USING (MEMBER_NO)
+                       WHERE REPLY_NO = ?)A
+              WHERE 
+                     A.CNT > 10
+              AND 
+                  A.NUM =1
+	</entry>
+	
+	
+	
+	<entry key="selectReply">
+		SELECT
+				R.REPLY_NO
+			   ,R.BOARD_NO
+			   ,R.MEMBER_NO
+			   ,R.REPLY_CONTENT
+			   ,R.REPLY_DATE
+			   ,R.REPLY_YN
+			   ,R.REPLY_REPORT_NO
+		       ,M.NICKNAME   
+	 	  FROM
+	 	  		REPLY R
+     LEFT JOIN
+                MEMBER M ON(R.MEMBER_NO = M.MEMBER_NO)
+	 	  WHERE
+                R.REPLY_NO =?
+	</entry>
+	
+	
+	
+	<!-- 덧글 신고처리 완료  -->
+
+	
+	<entry key="deleteReplyReport">
+					                    
+			DELETE FROM 
+			           REPLY_REPORT
+			      WHERE 
+			            REPLY_NO=?
+	</entry>
+	
+	<entry key="updateReplyStatus">
+			UPDATE REPLY
+			SET REPLY_YN = 'Y'
+			WHERE REPLY_NO = ?
+	</entry>
+	
+	
+	<entry key="updateReplyReport">
+		UPDATE 
+				REPLY_REPORT
+		   SET 
+		   		REPLY_STATUS_R = 'Y'
+		 WHERE 
+		 		REPLY_NO = ?
+	</entry>
+
+	
+	<!--                                        유진                                                                                              -->
+	<entry key="selectMsgListCount">
+	
+	SELECT COUNT(*) 
+	  FROM (SELECT  
+	                  MESSAGE_NO,
+	                  NICKNAME,
+	                  TO_CHAR(MESSAGE_REPORT_DATE, 'YY/MM/DD  HH:MI')MESSAGE_REPORT_DATE,
+	                  REPORT_REASON,
+	                  COUNT(*) OVER(PARTITION BY MESSAGE_NO) AS CNT
+	          FROM   
+	                  MESSAGE_REPORT
+	          LEFT JOIN 
+	                  MEMBER USING (NICKNAME))
+	 WHERE 
+	        CNT > 1
+	</entry>
+	
+	<entry key ="selectMsgList">
+		SELECT * 
+		  FROM(SELECT 
+		  				ROWNUM RNUM
+		  			   ,A.* 
+		  		FROM (SELECT MESSAGE_NO
+		  					,NICKNAME
+		  					,MESSAGE_REPORT_DATE
+		  					,MESSAGE_STATUS_R
+		  					,REPORT_REASON
+		                FROM 
+		                	 MESSAGE_REPORT
+		                JOIN 
+		                     MEMBER USING(NICKNAME)
+                        JOIN
+                             MESSAGE USING(MESSAGE_NO)
+		               WHERE 
+		                 	 MEMBER_STATUS = 'N'
+                        AND
+                             MESSAGE_YN = 'Y'
+		               ORDER BY 
+		               		 MESSAGE_REPORT_DATE DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="insertMessageReport">
+		INSERT
+		  INTO
+		  		MESSAGE_REPORT
+		  		(
+		  		MESSAGE_NO
+		  	   ,NICKNAME
+		  	   ,REPORT_REASON
+		  		)
+		VALUES
+				(
+				?
+			   ,?
+			   ,?
+				)
+	</entry>
+	
+	<entry key="updateMessageReport">
+		UPDATE
+				MESSAGE
+		   SET
+		 		MESSAGE_YN = 'Y'
+		 WHERE
+		 		MESSAGE_NO = ?
+	</entry>
+	
+	<entry key="selectMessage">
+		SELECT
+				MESSAGE_NO
+			   ,FROM_NIC
+			   ,MESSAGE_TITLE
+			   ,MESSAGE_CONTENT
+			   ,MESSAGE_ALERT_STATUS
+			   ,MESSAGE_REPORT
+			   ,MESSAGE_DATE
+			   ,MESSAGE_YN
+		  FROM
+				MESSAGE
+		 WHERE
+				MESSAGE_NO = ?
+				
+	</entry>
+	
+	<entry key="selectMessageReport">
+		SELECT
+				MESSAGE_NO
+			   ,NICKNAME
+  			   ,MESSAGE_REPORT_DATE
+  			   ,MESSAGE_STATUS_R
+ 			   ,REPORT_REASON
+ 		  FROM
+ 				MESSAGE_REPORT
+ 		 WHERE
+ 		 		MESSAGE_NO = ?
+	</entry>
+	
+	<entry key="deleteMessageReport">
+		DELETE
+		  FROM 
+				MESSAGE_REPORT
+		WHERE
+				MESSAGE_NO = ?
+	</entry>
+	
+	<entry key="updateMessageReport_2">
+		UPDATE
+		        MESSAGE_REPORT
+		   SET
+		        MESSAGE_STATUS_R = 'Y'
+		 WHERE
+		        MESSAGE_NO = ?
+	</entry>
+	
+	<entry key="updateMemeberReport_2">
+		UPDATE 
+		        MEMBER
+		   SET
+		    	REPORT_NO = (REPORT_NO + 1)
+		 WHERE
+		        NICKNAME = ?
+	</entry>
+	
+</properties>

@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+		
+	
+	<entry key="loginMember">
+		SELECT 
+			  MEMBER_NO,
+			  MEMBER_ID,
+			  MEMBER_PWD,
+			  NICKNAME,
+			  EMAIL,
+			  MEMBER_TYPE,
+			  ENROLL_DATE,
+			  MEMBER_STATUS,
+			  VISIT_COUNT,
+			  REPORT_NO
+	    FROM
+	    	MEMBER
+	   WHERE
+	   		MEMBER_ID = ?
+	   	AND
+	   		MEMBER_PWD = ?
+	   	AND
+	   		MEMBER_STATUS = 'N'
+	</entry>
+	
+	<entry key="idCheck">
+		SELECT
+		      COUNT(*)
+		  FROM
+		      MEMBER
+         WHERE
+              MEMBER_ID = ?
+	</entry>
+	
+	<entry key="nicknameCheck">
+		SELECT
+		      COUNT(*)
+		  FROM
+		      MEMBER
+		 WHERE
+		      NICKNAME = ?
+	</entry>
+	
+	<entry key="emailCheck">
+		SELECT
+		      COUNT(*)
+		  FROM
+		      MEMBER
+		 WHERE
+		      EMAIL = ?
+	</entry>
+	
+	<entry key="inserMember">
+		INSERT
+		  INTO
+		      MEMBER
+		      (
+		      MEMBER_NO
+		     ,MEMBER_ID
+		     ,NICKNAME
+		     ,MEMBER_PWD
+		     ,EMAIL
+		     ,MEMBER_TYPE
+		      )
+		VALUES
+		      (
+		      SEQ_MNO.NEXTVAL
+		      ,?
+		      ,?
+		      ,?
+		      ,?
+		      ,'A'
+		      )
+	</entry>
+	
+	<entry key="insertMemberAttach">
+		INSERT
+		  INTO
+		      MEMBER_ATTACH
+		      (
+		      FILE_NO
+		     ,MEMBER_NO
+		     ,ORIGIN_NAME
+		     ,CHANGE_NAME
+		     ,FILE_PATH
+		      )
+	    VALUES
+	          (
+	          SEQ_M_FNO.NEXTVAL
+	         ,SEQ_MNO.CURRVAL
+	         ,?
+	         ,?
+	         ,?
+	          )
+	</entry>
+	
+	<entry key="newAlarmReply">
+		SELECT 
+		      BOARD_NO
+		     ,BOARD_TYPE
+		     ,BOARD_TITLE
+		     ,COUNT(REPLY_NO) "COUNT(REPLY)"
+         FROM 
+             MAIN_BOARD JOIN REPLY USING(BOARD_NO)
+        WHERE 
+             MAIN_BOARD.MEMBER_NO = ?
+          AND 
+             REPLY_ALERT_STATUS = 'N'
+        GROUP 
+           BY 
+             BOARD_NO
+            ,BOARD_TYPE
+            ,BOARD_TITLE
+	</entry>
+	
+	<entry key="newAlarmRereply">
+	 SELECT 
+	       BOARD_NO
+	       ,BOARD_TYPE
+	       ,REPLY_NO
+	       ,REPLY_CONTENT
+	       ,COUNT(RE_REPLY_NO) "COUNT(RE_REPLY)"
+       FROM
+           RE_REPLY JOIN REPLY USING(REPLY_NO) JOIN MAIN_BOARD USING(BOARD_NO)
+      WHERE 
+           REPLY.MEMBER_NO = ?
+        AND
+           RE_REPLY_ALERT_STATUS = 'N'
+      GROUP 
+         BY 
+          	BOARD_NO 
+           ,BOARD_TYPE
+           ,REPLY_NO
+           ,REPLY_CONTENT
+	</entry>
+
+	<entry key="myBoardList">
+		SELECT
+		       BOARD_NO
+		      ,BOARD_TYPE
+		      ,BOARD_TITLE
+		      ,CREATE_DATE
+		  FROM
+		      MAIN_BOARD
+		 WHERE
+		      MEMBER_NO = ?
+		 ORDER
+		    BY
+		      BOARD_NO DESC
+	</entry>
+	<entry key="myReplyList">
+		SELECT
+		      REPLY.BOARD_NO
+		     ,BOARD_TYPE
+		     ,REPLY_NO
+		     ,REPLY_CONTENT
+		     ,REPLY_DATE
+         FROM
+             REPLY JOIN MAIN_BOARD ON(REPLY.BOARD_NO = MAIN_BOARD.BOARD_NO)
+        WHERE
+             REPLY.MEMBER_NO = ?
+        ORDER
+           BY
+             REPLY_NO DESC
+	</entry>
+	
+	<entry key="myReReplyList">
+		SELECT
+		      BOARD_NO
+		     ,MAIN_BOARD.BOARD_TYPE 
+		     ,RE_REPLY_NO
+		     ,RE_REPLY_CONTENT
+		     ,RE_REPLY_DATE
+         FROM
+             RE_REPLY JOIN REPLY USING(REPLY_NO) JOIN MAIN_BOARD USING(BOARD_NO)
+        WHERE
+             RE_REPLY.MEMBER_NO = ?
+        ORDER
+           BY
+             RE_REPLY_NO DESC
+	</entry>
+	<entry key="myLikeList">
+		SELECT
+		      BOARD_NO
+		     ,BOARD_TYPE 
+		     ,BOARD_TITLE
+		     ,CREATE_DATE
+		 FROM
+		     BOARD_LIKE_POST JOIN MAIN_BOARD USING(BOARD_NO)
+		WHERE
+		     BOARD_LIKE_POST.MEMBER_NO = ?
+		 AND
+		     BOARD_LIKE_COUNT = 1
+		 AND
+		     BOARD_STATUS = 'N'
+		ORDER
+		   BY
+		     CREATE_DATE DESC 
+	</entry>
+	
+	<entry key="myAlarmCheckR">
+	  UPDATE
+	        REPLY
+	    SET
+	       REPLY_ALERT_STATUS = 'Y'
+	 WHERE
+	      BOARD_NO = ?
+	   AND
+	      REPLY_ALERT_STATUS = 'N'	
+	</entry>
+	
+	<entry key="myAlarmCheckRr">
+	 UPDATE 
+	       RE_REPLY 
+	    SET 
+	       RE_REPLY_ALERT_STATUS = 'Y'
+     WHERE 
+          REPLY_NO = ?
+      AND
+         RE_REPLY_ALERT_STATUS = 'N'
+	</entry>
+	
+	<entry key="myPoint">
+	 SELECT
+	       POINT_DATE
+	      ,POINT
+	  FROM
+	      POINT
+	 WHERE 
+	      MEMBER_NO = ?
+	 ORDER
+	    BY 
+	      POINT_DATE DESC   	
+	</entry>
+	
+	<entry key="attCheck">
+	SELECT 
+	      ATTENDANCE_DATE
+     FROM 
+          ATTENDANCE_CHECK
+    WHERE 
+          MEMBER_NO = ?
+      AND
+         ATTENDANCE_CHECK = 'Y'
+    ORDER 
+       BY 
+          ATTENDANCE_DATE DESC
+	</entry>
+	
+	<entry key="todayAttcheck">
+	INSERT
+	      INTO
+	ATTENDANCE_CHECK 
+	                 (
+	                 ATTENDANCE_DATE
+	                ,MEMBER_NO
+	                ,ATTENDANCE_CHECK
+	                 )
+	       VALUES
+	              (
+	               SYSDATE 
+	              ,?
+	              ,'Y'
+	              )
+	</entry>
+	
+	<entry key="todayAttcheckchk">
+		SELECT 
+		      COUNT(*)
+		  FROM
+		      ATTENDANCE_CHECK
+		 WHERE
+		      TO_CHAR(ATTENDANCE_DATE,'YY/MM/DD') = ?
+           AND 
+              MEMBER_NO = ?
+	</entry>
+	
+	<entry key="attCheckPoint">
+		INSERT 
+		  INTO
+		      POINT
+		      (
+		      MEMBER_NO
+		     ,POINT
+		     ,POINT_DATE
+		      )
+		VALUES
+			 (
+			 ?
+			,50
+			,SYSDATE
+			 )      
+	</entry>
+	
+	<entry key="selectMyBoardList">
+		SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (SELECT 
+			                      BOARD_NO,
+			                      BOARD_TYPE,
+			                      BOARD_TITLE, 
+                                  BOARD_COUNT,
+			                      CREATE_DATE
+                              FROM 
+                                 MAIN_BOARD
+                             WHERE 
+                                  MEMBER_NO = ?
+                               AND 
+                                  BOARD_STATUS = 'N'
+                             ORDER 
+                                BY 
+                                  CREATE_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMyReplyList">
+	SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (SELECT 
+			        			  BOARD_NO,
+			        			  BOARD_TYPE,
+			                      REPLY_NO,
+			                      REPLY_CONTENT, 
+			                      REPLY_DATE
+                              FROM 
+                                 REPLY JOIN MAIN_BOARD USING(BOARD_NO)
+                             WHERE 
+                                  REPLY.MEMBER_NO = ?
+                               AND 
+                                  REPLY_YN = 'N'
+                             ORDER 
+                                BY 
+                                  REPLY_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMyReReplyList">
+		SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (SELECT 
+			        			  BOARD_NO,
+			        			  BOARD_TYPE,
+			                      RE_REPLY_NO,
+			                      RE_REPLY_CONTENT, 
+			                      RE_REPLY_DATE
+                              FROM 
+                                 RE_REPLY JOIN REPLY USING(REPLY_NO) JOIN MAIN_BOARD USING(BOARD_NO)
+                             WHERE 
+                                  RE_REPLY.MEMBER_NO = ?
+                               AND 
+                                  RE_REPLY_YN = 'N'
+                             ORDER 
+                                BY 
+                                  RE_REPLY_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+		<entry key="selectMyLikeList">
+		SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (SELECT 
+			                      BOARD_NO,
+			                      BOARD_TYPE,
+			                      BOARD_TITLE, 
+			                      CREATE_DATE
+                              FROM 
+                                BOARD_LIKE_POST JOIN MAIN_BOARD USING(BOARD_NO)
+                             WHERE 
+                                  BOARD_LIKE_POST.MEMBER_NO = ?
+                               AND 
+                                  BOARD_LIKE_COUNT = 1
+                                AND 
+                                  BOARD_STATUS = 'N'
+                             ORDER 
+                                BY 
+                                  CREATE_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMyPoint">
+		SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (SELECT 
+			                      POINT,
+                                  POINT_DATE
+                              FROM 
+                                 POINT
+                             WHERE 
+                                  MEMBER_NO = ?
+                             ORDER 
+                                BY 
+                                  POINT_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 유진님꺼 -->
+	
+	<entry key="deleteMember">
+		UPDATE
+				MEMBER
+		   SET
+		   		MEMBER_STATUS = 'Y'
+		 WHERE
+		 		MEMBER_PWD = ?
+		   AND
+		 		MEMBER_ID = ?
+	</entry>
+	
+	<entry key="updatePwdMember">
+		UPDATE
+				MEMBER
+		   SET
+				MEMBER_PWD = ?
+		 WHERE
+				MEMBER_NO = ?
+		   AND
+				MEMBER_PWD = ?
+	</entry>
+	
+	<entry key="selectMember_1">
+		SELECT 
+			  	MEMBER_NO,
+			 	MEMBER_ID,	
+			  	MEMBER_PWD,
+				NICKNAME,
+				EMAIL,
+				MEMBER_TYPE,
+				ENROLL_DATE,
+			  	MEMBER_STATUS,
+			  	VISIT_COUNT,
+			  	REPORT_NO
+	      FROM
+	    		MEMBER
+	     WHERE
+	   			MEMBER_ID = ?
+	   	   AND
+	   			MEMBER_STATUS = 'N'
+		
+	</entry>
+	
+	<entry key="updateMember_2">
+		UPDATE
+				MEMBER
+		   SET
+				NICKNAME = ?
+		 WHERE
+		 		MEMBER_ID = ?		
+				
+	</entry>
+	
+	<entry key="selectQnACount_A2">
+		SELECT
+				COUNT(*)
+		  FROM
+				QNA
+	</entry>
+	
+	<entry key="selectQnACount_2">
+		SELECT
+				COUNT(*)
+		  FROM
+				QNA
+		 WHERE
+				MEMBER_NO = ?	
+	</entry>
+	
+	<entry key="selectQnAList_A">
+		SELECT * 
+		  FROM(SELECT 
+		  				ROWNUM RNUM
+		  			   ,A.* 
+		  		FROM (SELECT QNA_NO
+		  					,MEMBER_ID
+		  					,QNA_TITLE
+		  					,QNA_CONTENT
+		  					,QNA_DATE
+		  					,QNA_CHECK
+		                FROM 
+		                	 QNA
+		                JOIN 
+		                     MEMBER USING(MEMBER_NO)
+		               WHERE 
+		                 	 MEMBER_STATUS = 'N'
+		               ORDER BY 
+		               		 QNA_NO DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectQnAList_2">
+		SELECT * 
+		  FROM(SELECT 
+		  				ROWNUM RNUM
+		  			   ,A.* 
+		  		FROM (SELECT QNA_NO
+		  					,MEMBER_ID
+		  					,QNA_TITLE
+		  					,QNA_CONTENT
+		  					,QNA_DATE
+		  					,QNA_CHECK
+		                FROM 
+		                	 QNA
+		                JOIN 
+		                     MEMBER USING(MEMBER_NO)
+		               WHERE 
+		               		 MEMBER_NO = ?
+		                 AND 
+		                 	 MEMBER_STATUS = 'N'
+		               ORDER BY 
+		               		 QNA_NO DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="InsertMemberQnA_2">
+		INSERT
+				INTO
+			  		QNA
+			  		(
+			  		QNA_NO
+				   ,MEMBER_NO
+				   ,QNA_TITLE
+				   ,QNA_CONTENT
+			  		)
+				VALUES
+					(
+					SEQ_QNO.NEXTVAL
+				   ,?
+				   ,?
+				   ,?
+					)
+	</entry>
+
+	<entry key="selectQnA_2">
+		SELECT 
+				QNA_NO,
+		        MEMBER_ID,
+		        QNA_TITLE,
+		        QNA_CONTENT,
+		        QNA_DATE
+		  FROM
+		        QNA
+		  JOIN
+		        MEMBER USING(MEMBER_NO)
+		 WHERE 
+		        QNA_NO = ?
+		
+	</entry>
+	
+	<entry key="selectAnswerList_2">
+		SELECT 
+				QNA_ANO
+			   ,QNA_ANSWER_CONTENT
+               ,TO_CHAR(QNA_ANSWER_DATE, 'YY/MM/DD HH:MI') QNA_ANSWER_DATE
+		  FROM
+				QNA_ANSWER
+         WHERE
+                QNA_NO = ?
+	</entry>
+	
+	<entry key="insertAnswer_2">
+		INSERT
+		  INTO
+		  		QNA_ANSWER
+		  		(
+		  		QNA_ANO
+		  	   ,QNA_NO
+		  	   ,MEMBER_NO
+		  	   ,QNA_ANSWER_CONTENT
+		  		)
+		VALUES
+				(
+				SEQ_A_QNO.NEXTVAL
+			   ,?
+			   ,1
+			   ,?
+				)
+	</entry>
+	
+	<entry key="updateAnswer_2">
+		UPDATE
+			    QNA
+		   SET
+			    QNA_CHECK = 'Y'
+		 WHERE
+			    QNA_NO = ? 
+	</entry>
+	
+	<entry key="selectFindId_2">
+		SELECT
+		        MEMBER_ID
+		  FROM
+		        MEMBER
+		 WHERE 
+		        EMAIL = ?
+	</entry>
+
+	<entry key ="selectFindPwd_2">
+		SELECT
+				COUNT(*)
+		  FROM
+				MEMBER
+	 	 WHERE
+				MEMBER_ID = ?
+		   AND
+				EMAIL = ?
+		
+	</entry>
+	
+	<entry key ="updateFindPwd">
+		UPDATE
+				MEMBER
+		   SET
+				MEMBER_PWD = ?
+		 WHERE
+				MEMBER_ID = ?
+	</entry>
+	
+	<entry key ="nickSearch_2">
+		SELECT 
+				NICKNAME
+	      FROM 
+	      		MEMBER
+		 WHERE 
+		 		NICKNAME LIKE '%'||?||'%'
+	</entry>
+	
+	<entry key="selectMsgListCount">
+		SELECT
+				COUNT(*)
+		  FROM
+				MESSAGE
+		  JOIN
+		  		MEMBER ON(NICKNAME = TO_NIC)		
+		 WHERE
+				NICKNAME = ?
+		   AND
+		   		MESSAGE_YN = 'N'
+	</entry>
+	
+	<entry key="selectMsgList">
+				SELECT * 
+		  FROM(SELECT 
+		  				ROWNUM RNUM
+		  			   ,A.* 
+		  		FROM (SELECT MESSAGE_NO
+		  					,FROM_NIC
+		  					,TO_NIC
+		  					,MESSAGE_TITLE
+		  					,MESSAGE_CONTENT
+		  					,MESSAGE_ALERT_STATUS
+                            ,MESSAGE_REPORT
+                            ,MESSAGE_DATE
+                            ,MESSAGE_YN
+		                FROM 
+		                	 MESSAGE
+		                JOIN 
+		                     MEMBER ON(NICKNAME = TO_NIC)
+		               WHERE 
+		               		 NICKNAME = ?
+		                 AND 
+		                 	 MEMBER_STATUS = 'N'
+		                 AND
+		   					 MESSAGE_YN = 'N'
+		               ORDER BY 
+		               		 MESSAGE_NO DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMsgSandListCount">
+		SELECT
+				COUNT(*)
+		  FROM
+				MESSAGE
+		  JOIN
+		  		MEMBER ON(NICKNAME = FROM_NIC)		
+		 WHERE
+				NICKNAME = ?
+		   AND
+		   		MESSAGE_YN = 'N'
+	</entry>
+	
+	<entry key="selectMsgSandList">
+		SELECT * 
+			  FROM(SELECT 
+			  				ROWNUM RNUM
+			  			   ,A.* 
+			  		FROM (SELECT MESSAGE_NO
+			  					,FROM_NIC
+			  					,TO_NIC
+			  					,MESSAGE_TITLE
+			  					,MESSAGE_CONTENT
+			  					,MESSAGE_ALERT_STATUS
+	                            ,MESSAGE_REPORT
+	                            ,MESSAGE_DATE
+	                            ,MESSAGE_YN
+			                FROM 
+			                	 MESSAGE
+			                JOIN 
+			                     MEMBER ON(NICKNAME = FROM_NIC)
+			               WHERE 
+			               		 NICKNAME = ?
+			                 AND 
+			                 	 MEMBER_STATUS = 'N'
+			                 AND
+		   						 MESSAGE_YN = 'N'
+			               ORDER BY 
+			               		 MESSAGE_NO DESC) A)
+			WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="updateMessage">
+		UPDATE
+				MESSAGE
+		   SET
+				MESSAGE_ALERT_STATUS = 'Y'
+		 WHERE
+				MESSAGE_NO = ?
+		   AND
+				MESSAGE_YN = 'N'
+				
+	</entry>
+	
+	<entry key = "selectDetailMsg">
+		SELECT 
+					MESSAGE_NO
+				   ,FROM_NIC
+				   ,TO_NIC
+				   ,MESSAGE_TITLE
+				   ,MESSAGE_CONTENT
+				   ,MESSAGE_ALERT_STATUS
+                   ,MESSAGE_REPORT
+                   ,MESSAGE_DATE
+                   ,MESSAGE_YN
+			  FROM
+			        MESSAGE
+			  JOIN
+			        MEMBER ON(NICKNAME = TO_NIC)
+			 WHERE 
+			        MESSAGE_NO = ?
+			   AND 
+			        MEMBER_STATUS = 'N'
+			   AND
+		   			MESSAGE_YN = 'N'
+	</entry>
+	
+	<entry key="selectDetailSandMsg">
+		SELECT 
+					MESSAGE_NO
+				   ,FROM_NIC
+				   ,TO_NIC
+				   ,MESSAGE_TITLE
+				   ,MESSAGE_CONTENT
+				   ,MESSAGE_ALERT_STATUS
+                   ,MESSAGE_REPORT
+                   ,MESSAGE_DATE
+                   ,MESSAGE_YN
+			  FROM
+			        MESSAGE
+			  JOIN
+			        MEMBER ON(NICKNAME = FROM_NIC)
+			 WHERE 
+			        MESSAGE_NO = ?
+			   AND 
+			        MEMBER_STATUS = 'N'
+			   AND
+		   			MESSAGE_YN = 'N'
+	</entry>
+	
+	<entry key="insertMessage">
+	
+		INSERT
+		  INTO
+				MESSAGE
+				(
+				MESSAGE_NO
+			   ,FROM_NIC
+		   	   ,TO_NIC
+		   	   ,MESSAGE_TITLE
+		   	   ,MESSAGE_CONTENT
+				)	
+		
+		VALUES		
+		   		(
+		   		SEQ_MSG_NO.NEXTVAL
+		   	   ,?
+		   	   ,?
+		   	   ,?
+		   	   ,?
+		   	    )
+	</entry>
+	
+	<entry key="deleteMessage">
+		UPDATE
+				MESSAGE
+		   SET
+				MESSAGE_YN = 'Y'
+		 WHERE
+		 		MESSAGE_NO = ?
+				
+	</entry>
+	
+</properties>

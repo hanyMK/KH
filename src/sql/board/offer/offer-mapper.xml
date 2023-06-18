@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <entry key="selectOfferList">
+      SELECT * FROM(               
+                  SELECT ROWNUM RNUM, A.* 
+                    FROM(SELECT
+                                      BOARD_TITLE
+                                     ,CATEGORY
+                                     ,NICKNAME
+                                     ,TO_CHAR(CREATE_DATE, 'YY/MM/DD') CREATE_DATE
+                                     ,TO_CHAR(CLOSING_DATE, 'YY/MM/DD') CLOSING_DATE
+                                     ,BOARD_COUNT
+                                     ,BOARD_NO,
+                                     MEMBER_NO
+                                 FROM
+                                      MAIN_BOARD
+                                 JOIN
+                                      MEMBER USING(MEMBER_NO)
+                                WHERE
+                                      MEMBER_TYPE = 'B'
+                                  AND
+                                     BOARD_STATUS = 'N'
+                                  AND 
+                                      BOARD_STATUS != 'S'
+                                 AND 
+                                     BOARD_TYPE = 'G'
+                              ORDER
+                                  BY
+                                      BOARD_NO DESC) A)
+           WHERE RNUM BETWEEN ? AND ? 
+   </entry>
+   
+   <entry key="selectListCount">
+      SELECT
+             COUNT(*)
+        FROM
+             MAIN_BOARD
+        JOIN
+             MEMBER USING(MEMBER_NO)
+       WHERE
+             MEMBER_TYPE = 'B'
+         AND
+             BOARD_STATUS = 'N'                      
+   </entry>
+   
+   <entry key="insertOfferBoard">
+      INSERT
+        INTO
+             MAIN_BOARD
+             (
+             BOARD_NO
+            ,MEMBER_NO
+            ,BOARD_TYPE
+            ,CATEGORY
+            ,BOARD_TITLE
+            ,BOARD_CONTENT 
+            ,CLOSING_DATE
+             )
+      VALUES
+             (
+             SEQ_BNO.NEXTVAL
+            ,?
+            ,'G'
+            ,?
+            ,?
+            ,?
+            ,? 
+             )      
+   </entry>
+   
+   <entry key="insertOfferAttachment">
+      INSERT
+        INTO
+             BOARD_ATTACH
+             (
+             FILE_NO
+            ,BOARD_NO
+            ,FILE_LEVEL
+            ,ORIGIN_NAME
+            ,CHANGE_NAME
+            ,FILE_PATH 
+             )
+      VALUES
+             (
+             SEQ_FNO.NEXTVAL
+            ,SEQ_BNO.CURRVAL
+            ,?
+            ,?
+            ,?
+            ,? 
+             )
+   </entry>
+   
+   <entry key="offerBoardDetail">
+      SELECT 
+               BOARD_NO
+              ,BOARD_TITLE
+              ,CATEGORY
+              ,BOARD_CONTENT
+              ,NICKNAME
+              ,EMAIL
+              ,CREATE_DATE
+              ,BOARD_COUNT
+              ,CLOSING_DATE
+              ,BOARD_REPORT_NO
+              ,MEMBER_NO
+           
+          FROM   
+               MAIN_BOARD
+          JOIN
+               MEMBER USING(MEMBER_NO)
+          WHERE
+                BOARD_NO = ?
+   </entry>
+   
+   <entry key="offerIncreaseCount">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_COUNT = BOARD_COUNT + 1
+       WHERE
+             BOARD_NO = ?
+         AND
+             BOARD_STATUS = 'N' 
+   </entry>
+   
+   <entry key="offerAttachmentDetailView">
+        SELECT
+                FILE_LEVEL
+               ,ORIGIN_NAME
+               ,CHANGE_NAME
+               ,FILE_PATH
+               ,FILE_NO
+               ,BOARD_NO
+           FROM
+                BOARD_ATTACH
+          WHERE
+                BOARD_NO = ?
+            AND
+                FILE_STATUS = 'N'     
+   </entry>
+   
+   <entry key="updateOfferBoard">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_TITLE = ?
+            ,BOARD_CONTENT = ?
+            ,CATEGORY = ?
+            ,CLOSING_DATE = ?
+            ,UPDATE_DATE = SYSDATE
+       WHERE    
+             BOARD_NO = ?
+         AND
+             BOARD_TYPE = 'G'
+         AND
+             BOARD_STATUS = 'N'              
+   </entry>
+   
+   <entry key="updateOfferBoardAttachment">
+      UPDATE
+             BOARD_ATTACH
+         SET
+             ORIGIN_NAME = ?
+            ,CHANGE_NAME = ?
+            ,FILE_PATH = ?
+            ,FILE_LEVEL = ?
+       WHERE
+             FILE_NO = ?
+         AND
+             BOARD_NO = ?             
+   </entry>   
+   
+   <entry key="newInsertOfferAttachment">
+      INSERT
+        INTO
+             BOARD_ATTACH
+             (
+             FILE_NO
+            ,BOARD_NO
+            ,FILE_LEVEL
+            ,ORIGIN_NAME
+            ,CHANGE_NAME
+            ,FILE_PATH 
+             )
+      VALUES
+             (
+             SEQ_FNO.NEXTVAL
+            ,?
+            ,?
+            ,?
+            ,?
+            ,? 
+             )
+   </entry>
+   
+   <entry key="deleteOfferBoard">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_STATUS = 'Y'
+       WHERE     
+             BOARD_NO = ?
+   </entry>
+</properties>

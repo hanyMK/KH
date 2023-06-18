@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+		
+	<entry key="noticeList">
+	SELECT * 
+			  FROM (SELECT 
+			              ROWNUM RNUM, 
+			              A.* 
+			        FROM  (			SELECT 
+	      BOARD_NO
+	     ,CATEGORY
+	     ,BOARD_TITLE
+	     ,BOARD_CONTENT
+	     ,CREATE_DATE
+	     ,BOARD_COUNT
+	 FROM
+	     MAIN_BOARD
+	 WHERE 
+	      BOARD_TYPE = 'A'
+	 ORDER 
+	    BY 
+	      CREATE_DATE DESC) A)
+ 								WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="noticeListCount">
+	  SELECT 
+	      COUNT(BOARD_NO)
+	 FROM
+	     MAIN_BOARD 
+    WHERE BOARD_TYPE = 'A' 
+    AND BOARD_STATUS = 'N'
+	</entry>
+	
+	<entry key="increaseCount">
+	 UPDATE
+		      MAIN_BOARD
+		  SET
+		     BOARD_COUNT = BOARD_COUNT + 1
+		WHERE
+		     BOARD_NO = ?
+		 AND
+		    BOARD_STATUS = 'N'
+	</entry>
+	
+	<entry key="selectBoard">
+	 SELECT
+		      BOARD_NO
+		     ,BOARD_TITLE
+		     ,CATEGORY
+		     ,BOARD_CONTENT
+		     ,CREATE_DATE
+		     ,BOARD_COUNT
+		 FROM
+		     MAIN_BOARD
+		WHERE
+		     BOARD_NO = ?
+		 AND
+		    BOARD_STATUS = 'N'
+		 AND
+		    BOARD_TYPE = 'A'
+	</entry>
+	
+	<entry key="selectAttachment">
+	 SELECT
+		      FILE_NO
+		     ,BOARD_NO
+		     ,ORIGIN_NAME
+		     ,CHANGE_NAME
+		     ,FILE_PATH
+		 FROM
+		     BOARD_ATTACH
+		WHERE
+		     BOARD_NO = ?
+		 AND
+		    FILE_STATUS = 'N'
+	</entry>
+	
+	<entry key="insertNoticeBoard">
+	INSERT 
+	  INTO 
+	      MAIN_BOARD 
+	      (
+	      BOARD_NO
+	     ,MEMBER_NO
+	     ,BOARD_TYPE
+	     ,CATEGORY
+	     ,BOARD_TITLE
+	     ,BOARD_CONTENT
+	     ,CREATE_DATE)
+   VALUES(
+         SEQ_BNO.NEXTVAL
+         ,?
+         ,'A'
+         ,? 
+         ,?
+         ,?
+         ,SYSDATE)
+	</entry>
+	
+	<entry key="insertNoticeAttachList">
+	INSERT 
+	  INTO 
+	      BOARD_ATTACH 
+	      (
+	      FILE_NO
+	      ,BOARD_NO
+	      ,FILE_LEVEL
+	      ,ORIGIN_NAME
+	      ,CHANGE_NAME
+	      ,FILE_PATH)
+    VALUES
+         (SEQ_FNO.NEXTVAL
+         ,SEQ_BNO.CURRVAL
+         ,1
+         ,?
+         ,?
+         ,?)
+	</entry>
+
+</properties>

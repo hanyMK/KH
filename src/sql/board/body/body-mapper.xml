@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	
+	<entry key="insertBody">
+				
+		INSERT 
+		  INTO 
+		       MAIN_BOARD
+		       (
+		        BOARD_NO
+		       ,MEMBER_NO
+		       ,BOARD_TYPE
+		       ,CATEGORY
+		       ,BOARD_TITLE
+		       ,BOARD_CONTENT
+		       ,VOTE_YN
+		       )
+		VALUES
+		        (
+		        SEQ_BNO.NEXTVAL
+		       ,?
+		       ,'C'
+		       ,?
+		       ,?
+		       ,?
+		       ,?
+		       )
+				
+	
+	
+	</entry>
+	
+	<entry key="insertBodyAttachment">	
+	
+		INSERT 
+		  INTO
+		        BOARD_ATTACH
+		        (
+		        FILE_NO
+		        ,BOARD_NO
+		        ,FILE_LEVEL
+		        ,ORIGIN_NAME
+		        ,CHANGE_NAME
+		        ,FILE_PATH
+		        )
+		VALUES
+		        (
+		        SEQ_FNO.NEXTVAL
+		        ,SEQ_BNO.CURRVAL
+		        ,?
+		        ,?
+		        ,?
+		        ,?
+		        )
+	
+	</entry>
+	
+	<entry key="selectBodyList">
+		
+	SELECT * FROM(SELECT ROWNUM RNUM,A.*
+                    FROM(
+                            SELECT 
+                                     B.BOARD_NO
+                                    ,B.MEMBER_NO
+                                    ,B.BOARD_TITLE
+                                    ,M.NICKNAME
+                                    ,TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE
+                                    ,B.BOARD_COUNT
+                                    ,FILE_PATH || '/' || CHANGE_NAME TITLEIMG 
+                                    ,COUNT(DISTINCT REPLY_NO) AS REPLY_COUNT
+                                    
+                             FROM
+                                    MAIN_BOARD B 
+                                     LEFT JOIN 
+                                    REPLY R ON(R.BOARD_NO = B.BOARD_NO)
+                              
+                                    
+                             LEFT JOIN 
+                                    MEMBER M ON(B.MEMBER_NO = M.MEMBER_NO)
+                             LEFT JOIN
+                                    BOARD_ATTACH F ON(F.BOARD_NO = B.BOARD_NO)
+                            
+                             WHERE 
+                                    BOARD_TYPE= 'C'
+                              AND 
+                                    BOARD_STATUS = 'N'  
+                             AND
+                                    FILE_LEVEL = 0
+                                
+                                
+                            GROUP BY 
+                                     B.BOARD_NO
+                                    ,B.MEMBER_NO
+                                    ,B.BOARD_TITLE
+                                    ,M.NICKNAME
+                                    ,TO_CHAR(CREATE_DATE, 'YYYY-MM-DD')
+                                    ,B.BOARD_COUNT
+                                    ,FILE_PATH || '/' || CHANGE_NAME
+                                    
+                                
+                             
+                             ORDER 
+                             BY B.BOARD_NO DESC)A)
+ WHERE RNUM BETWEEN 1 AND 20                          
+ 
+		
+		
+	</entry>
+	
+	<entry key="increaseCount">
+		UPDATE
+				MAIN_BOARD
+		SET
+				BOARD_COUNT = BOARD_COUNT + 1
+		WHERE 
+				BOARD_NO = ?
+		AND 
+				BOARD_STATUS = 'N'
+	</entry>
+	
+<entry key="selectDetail">
+	
+						SELECT 
+                                     B.BOARD_NO
+                                    ,B.MEMBER_NO
+                                    ,B.BOARD_TITLE
+                                    ,B.BOARD_CONTENT
+                                    ,M.NICKNAME
+                                    ,TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE
+                                    ,B.BOARD_COUNT
+                                    ,FILE_PATH || '/' || CHANGE_NAME TITLEIMG 
+                                      ,VOTE_YN
+                                    
+                             FROM
+                                    MAIN_BOARD B 
+                                     LEFT JOIN 
+                                    REPLY R ON(R.BOARD_NO = B.BOARD_NO)
+                              
+                                    
+                             LEFT JOIN 
+                                    MEMBER M ON(B.MEMBER_NO = M.MEMBER_NO)
+                             LEFT JOIN
+                                    BOARD_ATTACH F ON(F.BOARD_NO = B.BOARD_NO)
+                             LEFT JOIN
+                                    BOARD_LIKE_POST  BK ON(BK.BOARD_NO = B.BOARD_NO)
+                            
+                            
+                             WHERE 
+                                    BOARD_TYPE= 'C'
+                              AND 
+                                    BOARD_STATUS = 'N'  
+                             AND
+                                    FILE_LEVEL = 0
+                            AND
+                                    B.BOARD_NO = ?
+                               
+                                
+                            GROUP BY 
+                                     B.BOARD_NO
+                                    ,B.MEMBER_NO
+                                    ,B.BOARD_TITLE
+                                    ,B.BOARD_CONTENT
+                                    ,M.NICKNAME
+                                    ,TO_CHAR(CREATE_DATE, 'YYYY-MM-DD')
+                                    ,B.BOARD_COUNT
+                                    ,FILE_PATH || '/' || CHANGE_NAME
+                                      ,VOTE_YN
+                                
+                             
+                             ORDER 
+                             BY B.BOARD_NO DESC
+             
+
+	
+	</entry>
+	
+	<entry key="detailAttachment">
+	
+		SELECT	
+				 FILE_NO
+				,BOARD_NO
+				,FILE_LEVEL
+				,ORIGIN_NAME
+				,CHANGE_NAME
+				,FILE_PATH
+		FROM
+				BOARD_ATTACH
+	
+		WHERE
+				BOARD_NO = ?
+				
+		
+	</entry>
+
+<entry key="deleteBoard">
+		UPDATE
+		       MAIN_BOARD
+		   SET
+		       BOARD_STATUS = 'Y'
+		 WHERE     
+		       BOARD_NO = ?
+	</entry>
+
+	
+	
+
+</properties>
+
+
+
+

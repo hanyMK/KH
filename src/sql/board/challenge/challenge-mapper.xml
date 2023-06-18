@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <entry key="selectChallengeList">
+      SELECT * FROM(               
+                SELECT ROWNUM RNUM, A.* 
+                  FROM(        SELECT
+                                      BOARD_TITLE
+                                     ,B.MEMBER_NO AS MEMBER_NO
+                                     ,CATEGORY
+                                     ,NICKNAME
+                                     ,TO_CHAR(CREATE_DATE, 'YY/MM/DD') CREATE_DATE
+                                     ,BOARD_COUNT
+                                     ,BOARD_NO
+                                     ,FILE_PATH||'/'||CHANGE_NAME TITLEIMG
+                                     ,CASE WHEN LENGTH(BOARD_CONTENT) > 130 THEN RPAD(SUBSTR(BOARD_CONTENT, 1, 130), 270, '.')
+                                           ELSE BOARD_CONTENT
+                                            END "BOARD_CONTENT"
+                                 FROM
+                                      MAIN_BOARD B
+                                 JOIN
+                                      MEMBER M ON(B.MEMBER_NO = M.MEMBER_NO)
+                                 JOIN
+                                      BOARD_ATTACH USING(BOARD_NO)
+                                WHERE
+                                     BOARD_STATUS = 'N'
+                                 AND 
+                                     BOARD_TYPE = 'D'
+                                  AND
+                                      FILE_LEVEL = 0     
+                              ORDER
+                                  BY
+                                      BOARD_NO DESC) A)
+           WHERE RNUM BETWEEN ? AND ?
+   </entry>
+   
+   <entry key="selectListCount">
+      SELECT
+             COUNT(*)
+        FROM
+             MAIN_BOARD
+          JOIN
+               BOARD_ATTACH USING(BOARD_NO)
+       WHERE
+             BOARD_TYPE = 'D'
+         AND
+             BOARD_STATUS = 'N'
+           AND
+               FILE_LEVEL = 0                    
+   </entry>
+   
+   <entry key="insertChallengeBoard">
+      INSERT
+        INTO
+             MAIN_BOARD
+             (
+             BOARD_NO
+            ,MEMBER_NO
+            ,BOARD_TYPE
+            ,CATEGORY
+            ,BOARD_TITLE
+            ,BOARD_CONTENT
+            ,VOTE_YN
+             )
+      VALUES
+             (
+             SEQ_BNO.NEXTVAL
+            ,?
+            ,'D'
+            ,?
+            ,?
+            ,?
+            ,?
+             )      
+   </entry>
+   
+   <entry key="insertChallengeAttachment">
+      INSERT
+        INTO
+             BOARD_ATTACH
+             (
+             FILE_NO
+            ,BOARD_NO
+            ,FILE_LEVEL
+            ,ORIGIN_NAME
+            ,CHANGE_NAME
+            ,FILE_PATH 
+             )
+      VALUES
+             (
+             SEQ_FNO.NEXTVAL
+            ,SEQ_BNO.CURRVAL
+            ,?
+            ,?
+            ,?
+            ,? 
+             )
+   </entry>
+   
+   <entry key="insertChallengeVoteTitle">
+      INSERT
+        INTO
+             BOARD_VOTE
+             (
+             VOTE_NO
+            ,BOARD_NO
+            ,VOTE_TITLE
+            ,VOTE_DUPLI
+             )
+      VALUES       
+            (
+            SEQ_VNO.NEXTVAL
+           ,SEQ_BNO.CURRVAL
+           ,?
+           ,? 
+            )
+   </entry>
+   
+   <entry key="insertChallengeVoteQuery">
+      INSERT
+        INTO
+             VOTE_QUERY
+             (
+             VOTE_NO
+            ,VOTE_TYPE
+            ,QUESTION
+             )
+      VALUES
+             (
+             SEQ_VNO.CURRVAL
+            ,?
+            ,? 
+             ) 
+   </entry>
+   
+   <entry key="ChallengeBoardDetail">
+      SELECT 
+               BOARD_NO
+              ,B.MEMBER_NO AS MEMBER_NO
+              ,BOARD_TITLE
+              ,CATEGORY
+              ,BOARD_CONTENT
+              ,NICKNAME
+              ,CREATE_DATE
+              ,BOARD_COUNT
+              ,BOARD_REPORT_NO
+              ,VOTE_YN
+          FROM   
+               MAIN_BOARD B
+          JOIN
+               MEMBER M ON(B.MEMBER_NO = M.MEMBER_NO)
+         WHERE
+               BOARD_NO = ?
+   </entry>
+   
+   <entry key="ChallengeAttachmentDetailView">
+        SELECT
+                FILE_LEVEL
+               ,ORIGIN_NAME
+               ,CHANGE_NAME
+               ,FILE_PATH
+               ,FILE_NO
+               ,BOARD_NO
+           FROM
+                BOARD_ATTACH
+          WHERE
+                BOARD_NO = ?
+            AND
+                FILE_STATUS = 'N'     
+   </entry>
+   
+   <entry key="ChallengeIncreaseCount">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_COUNT = BOARD_COUNT + 1
+       WHERE
+             BOARD_NO = ?
+         AND
+             BOARD_STATUS = 'N' 
+   </entry>
+   
+   <entry key="ChallengeVoteTitleDetatilView">
+      SELECT
+               VOTE_NO
+              ,VOTE_TITLE
+              ,VOTE_DUPLI
+              ,BOARD_NO
+         FROM
+              BOARD_VOTE
+        WHERE
+              BOARD_NO = ?
+   </entry>
+   
+   <entry key="ChallengeVoteQueryDetailView">
+      SELECT
+             VOTE_NO
+            ,VOTE_TYPE
+            ,QUESTION
+            ,VOTE_COUNT
+        FROM
+             VOTE_QUERY
+       WHERE
+             VOTE_NO = ?           
+   </entry>
+   
+   <entry key="temporayInsertChallengeBoard">
+      INSERT
+        INTO
+             MAIN_BOARD
+             (
+             BOARD_NO
+            ,MEMBER_NO
+            ,BOARD_TYPE
+            ,CATEGORY
+            ,BOARD_TITLE
+            ,BOARD_CONTENT
+            ,VOTE_YN
+            ,BOARD_STATUS
+             )
+      VALUES
+             (
+             SEQ_BNO.NEXTVAL
+            ,?
+            ,'D'
+            ,?
+            ,?
+            ,?
+            ,?
+            ,?
+             ) 
+   
+   </entry>
+   
+   <entry key="increaseChallengeVote">
+      UPDATE
+              VOTE_QUERY
+          SET
+              VOTE_COUNT = VOTE_COUNT + 1
+        WHERE
+              VOTE_NO = ?
+          AND
+              VOTE_TYPE = ?
+   </entry>
+   
+   <entry key="enrollChallengeVote">
+      INSERT
+         INTO
+              VOTE_ENROLL
+              (
+              VOTE_NO
+             ,MEMBER_NO 
+              )
+       VALUES
+              (
+              ?
+             ,? 
+              )
+   </entry>
+   
+   <entry key="dupliIncreaseVote">
+      UPDATE
+              VOTE_QUERY
+          SET
+              VOTE_COUNT = VOTE_COUNT + 1
+        WHERE
+              VOTE_NO = ?
+          AND
+              VOTE_TYPE = ?
+   </entry>
+   
+   <entry key="updateChallengeBoard">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_TITLE = ?
+            ,BOARD_CONTENT = ?
+            ,CATEGORY = ?
+            ,UPDATE_DATE = SYSDATE
+       WHERE    
+             BOARD_NO = ?
+         AND
+             BOARD_TYPE = 'D'
+         AND
+             BOARD_STATUS = 'N'              
+   </entry>
+   
+   <entry key="updateChallengeBoardAttachment">
+      UPDATE
+             BOARD_ATTACH
+         SET
+             ORIGIN_NAME = ?
+            ,CHANGE_NAME = ?
+            ,FILE_PATH = ?
+            ,FILE_LEVEL = ?
+       WHERE
+             FILE_NO = ?
+         AND
+             BOARD_NO = ?             
+   </entry>   
+   
+   <entry key="newInsertChallengeAttachment">
+      INSERT
+        INTO
+             BOARD_ATTACH
+             (
+             FILE_NO
+            ,BOARD_NO
+            ,FILE_LEVEL
+            ,ORIGIN_NAME
+            ,CHANGE_NAME
+            ,FILE_PATH 
+             )
+      VALUES
+             (
+             SEQ_FNO.NEXTVAL
+            ,?
+            ,?
+            ,?
+            ,?
+            ,? 
+             )
+   </entry>
+   
+   <entry key="deleteChallengeBoard">
+      UPDATE
+             MAIN_BOARD
+         SET
+             BOARD_STATUS = 'Y'
+       WHERE     
+             BOARD_NO = ?
+   </entry>
+   
+</properties>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	
+	<entry key="selectTopTenList">
+		SELECT * FROM(               
+						SELECT ROWNUM RNUM, A.* 
+						  FROM(SELECT
+						  			  BOARD_NO
+						  			 ,BOARD_TYPE
+                                     ,BOARD_TITLE
+                                     ,NICKNAME
+                                     ,TO_CHAR(CREATE_DATE, 'YY/MM/DD') CREATE_DATE
+                                     ,BOARD_COUNT
+                                 FROM
+                                      MAIN_BOARD
+                                 JOIN
+                                      MEMBER USING(MEMBER_NO)
+                                WHERE
+                       				  BOARD_STATUS = 'N'
+                 			    ORDER
+                      			   BY
+                           			  BOARD_COUNT DESC) A)
+           WHERE RNUM BETWEEN 1 AND 30	
+	</entry>
+	
+	<entry key="selectTopTenTenList">
+		SELECT * FROM(               
+						SELECT ROWNUM RNUM, A.* 
+						  FROM(SELECT
+						  			  BOARD_NO
+						  			 ,BOARD_TYPE
+                                     ,BOARD_TITLE
+                                     ,NICKNAME
+                                     ,TO_CHAR(CREATE_DATE, 'YY/MM/DD') CREATE_DATE
+                                     ,BOARD_COUNT
+                                 FROM
+                                      MAIN_BOARD
+                                 JOIN
+                                      MEMBER USING(MEMBER_NO)
+                                WHERE
+                       				  BOARD_STATUS = 'N'
+                 			    ORDER
+                      			   BY
+                           			  BOARD_COUNT DESC) A)
+           WHERE RNUM BETWEEN 1 AND 10	
+	</entry>
+
+	
+</properties>

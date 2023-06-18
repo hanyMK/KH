@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+<entry key="insertLike">
+
+	INSERT 
+		  INTO
+				BOARD_LIKE_POST
+				(
+				 BOARD_NO
+				,MEMBER_NO
+				,BOARD_LIKE_COUNT
+				)
+		VALUES
+				(
+				 ?
+				,?
+				,1
+				)
+
+</entry>
+
+<entry key="selectLike">
+
+SELECT
+          BOARD_NO
+        ,SUM( BOARD_LIKE_COUNT) AS BOARD_LIKE_COUNT
+        ,SUM( BOARD_DISLIKE_COUNT) AS BOARD_DISLIKE_COUNT
+    FROM
+         BOARD_LIKE_POST 
+
+WHERE
+         BOARD_NO = ?
+GROUP BY
+            BOARD_NO
+        
+        
+</entry>
+
+
+
+<entry key="selectMemberNo">
+
+SELECT
+        MEMBER_NO
+ FROM 
+        BOARD_LIKE_POST
+WHERE
+        BOARD_NO = ?
+		
+
+</entry>
+
+
+
+<entry key="deleteLike">
+
+DELETE
+ 
+  FROM 
+		BOARD_LIKE_POST
+
+WHERE 
+        BOARD_NO = ?
+        
+  AND   
+  		MEMBER_NO = ?
+
+	
+	
+
+</entry>
+
+
+
+
+
+</properties>

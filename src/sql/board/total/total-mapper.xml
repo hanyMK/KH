@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	
+	<entry key="totalSearch">
+           
+           SELECT * FROM(               
+				SELECT ROWNUM RNUM, A.* 
+				  FROM( SELECT 
+								BOARD_NO, BOARD_TITLE, BOARD_CONTENT, CATEGORY, BOARD_TYPE, NICKNAME, REPLY_CONTENT, RE_REPLY_CONTENT
+						  FROM 
+							    MAIN_BOARD
+						  LEFT JOIN    
+						        MEMBER USING(MEMBER_NO)
+						  LEFT JOIN
+						        REPLY USING(BOARD_NO)
+						  LEFT JOIN   
+						        RE_REPLY USING(REPLY_NO)
+						        
+						  WHERE 
+								BOARD_TITLE LIKE '%'||?||'%' OR BOARD_CONTENT LIKE '%'||?||'%' 
+								OR CATEGORY LIKE '%'||?||'%' OR BOARD_TYPE LIKE '%'||?||'%' 
+						        OR NICKNAME LIKE '%'||?||'%' OR REPLY_CONTENT LIKE '%'||?||'%' 
+						        OR RE_REPLY_CONTENT LIKE '%'||?||'%'
+          			   	  ORDER
+              			     BY
+                   			    CREATE_DATE DESC) A)
+           WHERE RNUM BETWEEN 1 AND 5
+	</entry>
+	
+</properties>
